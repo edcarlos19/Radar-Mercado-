@@ -2,7 +2,7 @@
   functions = "netlify/functions"
 
 [functions]
-  timeout = 50
+  timeout = 30
 
 [[redirects]]
   from = "/api/radar"
