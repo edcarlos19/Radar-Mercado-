@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguro de Vida · Radar Semanal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d1117;
+    --paper: #f5f0e8;
+    --cream: #ede8dc;
+    --gold: #c9a84c;
+    --gold-light: #e8d4a0;
+    --red: #b5341a;
+    --teal: #1a5f7a;
+    --muted: #6b6357;
+    --border: #c8bfad;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 4px solid var(--gold);
+  }
+  .masthead-left { display: flex; flex-direction: column; gap: 2px; }
+  .masthead-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .masthead-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .masthead-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(12px, 1.5vw, 16px);
+    font-style: italic;
+    color: var(--gold-light);
+    margin-top: 6px;
+  }
+  .masthead-right { text-align: right; }
+  .edition-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .edition-badge span { color: var(--paper); }
+
+  /* ── TICKER ── */
+  .ticker-bar {
+    background: var(--gold);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    padding: 7px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .ticker-inner {
+    display: inline-block;
+    animation: ticker 30s linear infinite;
+  }
+  @keyframes ticker {
+    0%   { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    background: var(--cream);
+  }
+  .controls-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  .btn-generate {
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 10px 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background .2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-generate:hover { background: var(--teal); }
+  .btn-generate:disabled { background: var(--muted); cursor: not-allowed; }
+  .btn-pdf {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    padding: 10px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-pdf:hover { border-color: var(--gold); color: var(--gold); }
+  .spin { display: inline-block; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── USAGE COUNTER ── */
+  .usage-pill {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .usage-bar {
+    width: 80px;
+    height: 6px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .usage-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width .4s ease;
+  }
+  .usage-bar-fill.danger { background: var(--red); }
+  .usage-label { white-space: nowrap; }
+
+  /* ── PAYWALL OVERLAY ── */
+  .paywall-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,17,23,0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .paywall-overlay.active { display: flex; }
+  .paywall-box {
+    background: var(--paper);
+    border-top: 5px solid var(--gold);
+    max-width: 480px;
+    width: 90%;
+    padding: 40px;
+    position: relative;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+  .paywall-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .paywall-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .paywall-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .paywall-plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .plan-card {
+    border: 1.5px solid var(--border);
+    padding: 16px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .plan-card:hover, .plan-card.selected { border-color: var(--gold); background: rgba(201,168,76,.05); }
+  .plan-card.featured { border-color: var(--ink); }
+  .plan-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .plan-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .plan-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .plan-period {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .plan-saving {
+    font-size: 11px;
+    color: #1a7a4a;
+    font-family: 'DM Mono', monospace;
+    margin-top: 4px;
+  }
+  .btn-subscribe {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: background .2s;
+    text-transform: uppercase;
+  }
+  .btn-subscribe:hover { background: var(--teal); }
+  .paywall-fine {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .paywall-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    background: none; border: none;
+    font-size: 20px; cursor: pointer;
+    color: var(--muted);
+  }
+  .paywall-close:hover { color: var(--ink); }
+
+  /* ── FREE TRIAL BANNER ── */
+  .trial-banner {
+    background: var(--teal);
+    color: var(--paper);
+    text-align: center;
+    padding: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    display: none;
+  }
+  .trial-banner a { color: var(--gold); cursor: pointer; text-decoration: underline; }
+
+  /* ── USAGE COUNTER ── */
+  .usage-pill {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .usage-bar {
+    width: 80px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 0;
+    overflow: hidden;
+  }
+  .usage-bar-fill {
+    height: 100%;
+    background: var(--gold);
+    transition: width .4s ease;
+  }
+  .usage-bar-fill.danger { background: var(--red); }
+  .usage-label { white-space: nowrap; }
+
+  /* ── PAYWALL OVERLAY ── */
+  .paywall-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,17,23,0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .paywall-overlay.active { display: flex; }
+  .paywall-box {
+    background: var(--paper);
+    border-top: 5px solid var(--gold);
+    max-width: 480px;
+    width: 90%;
+    padding: 40px;
+    position: relative;
+    animation: slideUp .3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+  .paywall-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .paywall-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .paywall-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .paywall-plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .plan-card {
+    border: 1.5px solid var(--border);
+    padding: 16px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+  }
+  .plan-card:hover, .plan-card.selected { border-color: var(--gold); background: rgba(201,168,76,.05); }
+  .plan-card.featured { border-color: var(--ink); }
+  .plan-badge {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .plan-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .plan-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .plan-period {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .plan-saving {
+    font-size: 11px;
+    color: #1a7a4a;
+    font-family: 'DM Mono', monospace;
+    margin-top: 4px;
+  }
+  .btn-subscribe {
+    width: 100%;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: background .2s;
+    text-transform: uppercase;
+  }
+  .btn-subscribe:hover { background: var(--teal); }
+  .paywall-fine {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .paywall-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    background: none; border: none;
+    font-size: 20px; cursor: pointer;
+    color: var(--muted);
+  }
+  .paywall-close:hover { color: var(--ink); }
+
+  /* ── FREE TRIAL BANNER ── */
+  .trial-banner {
+    background: var(--teal);
+    color: var(--paper);
+    text-align: center;
+    padding: 9px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    display: none;
+  }
+  .trial-banner a { color: var(--gold); cursor: pointer; text-decoration: underline; }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 0;
+    min-height: 80vh;
+  }
+  .main-col {
+    padding: 36px 40px;
+    border-right: 1px solid var(--border);
+  }
+  .side-col {
+    padding: 36px 28px;
+    background: var(--cream);
+  }
+
+  /* ── SECTION ── */
+  .section { margin-bottom: 40px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .section-icon {
+    width: 32px; height: 32px;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .content-area {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #1a1a1a;
+  }
+  .content-area p { margin-bottom: 12px; }
+  .content-area ul { padding-left: 18px; }
+  .content-area li { margin-bottom: 8px; }
+  .content-area strong { color: var(--ink); font-weight: 500; }
+  .content-area .highlight {
+    border-left: 3px solid var(--gold);
+    padding: 10px 16px;
+    background: rgba(201,168,76,.08);
+    margin: 14px 0;
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+  }
+
+  /* ── PLACEHOLDER ── */
+  .placeholder-card {
+    background: var(--cream);
+    border: 1.5px dashed var(--border);
+    padding: 40px 30px;
+    text-align: center;
+  }
+  .placeholder-icon { font-size: 36px; margin-bottom: 14px; }
+  .placeholder-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .placeholder-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── SIDEBAR WIDGETS ── */
+  .widget { margin-bottom: 30px; }
+  .widget-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(200,191,173,.4);
+    font-size: 13px;
+  }
+  .stat-label { color: var(--muted); font-size: 12px; }
+  .stat-value { font-family: 'DM Mono', monospace; font-weight: 500; }
+  .stat-up { color: #1a7a4a; }
+  .stat-down { color: var(--red); }
+
+  .keywords { display: flex; flex-wrap: wrap; gap: 6px; }
+  .kw {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 4px 9px;
+    letter-spacing: 1px;
+  }
+  .kw.gold { background: var(--gold); color: var(--ink); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 30px 0;
+  }
+
+  /* ── LOADING SKELETON ── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--cream) 25%, var(--border) 50%, var(--cream) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    height: 14px;
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+  .skeleton.wide { width: 100%; }
+  .skeleton.medium { width: 75%; }
+  .skeleton.short { width: 50%; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--ink);
+    color: var(--muted);
+    padding: 18px 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .footer a { color: var(--gold); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .masthead { flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px; }
+    .controls { padding: 16px 20px; }
+    .layout { grid-template-columns: 1fr; }
+    .main-col { padding: 24px 20px; border-right: none; }
+    .side-col { padding: 24px 20px; border-top: 1px solid var(--border); }
+    .footer { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-left">
+    <div class="masthead-label">● Inteligência de Mercado</div>
+    <div class="masthead-title">RADAR DE<br>MERCADO</div>
+    <div class="masthead-subtitle">Inteligência de Mercado por Setor · Powered by IA</div>
+  </div>
+  <div class="masthead-right">
+    <div class="edition-badge">
+      EDIÇÃO <span id="edition-num">—</span><br>
+      <span id="edition-date">—</span><br>
+      Gerado por IA com dados atuais
+    </div>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <span class="ticker-inner">
+    ◆ INTELIGÊNCIA DE MERCADO &nbsp;&nbsp; ◆ SEGUROS &nbsp;&nbsp; ◆ SAÚDE &nbsp;&nbsp; ◆ FINTECHS &nbsp;&nbsp; ◆ ENERGIA &nbsp;&nbsp; ◆ AGRONEGÓCIO &nbsp;&nbsp; ◆ IMÓVEIS &nbsp;&nbsp; ◆ VAREJO &nbsp;&nbsp; ◆ EDUCAÇÃO &nbsp;&nbsp; ◆ LOGÍSTICA &nbsp;&nbsp; ◆ TENDÊNCIAS &nbsp;&nbsp; ◆ COMPETITIVIDADE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span>
+</div>
+
+<!-- TRIAL BANNER -->
+<div class="trial-banner" id="trial-banner" style="display:none!important">
+  ⚡ Você está no período gratuito — <span id="trial-remaining"></span> geração(ões) restante(s). <a onclick="showPaywall('banner')">Assine para acesso ilimitado →</a>
+</div>
+
+<!-- PAYWALL MODAL -->
+<div class="paywall-overlay" id="paywall-overlay">
+  <div class="paywall-box">
+    <button class="paywall-close" onclick="closePaywall()">✕</button>
+    <div class="paywall-label">● Acesso Premium</div>
+    <div class="paywall-title">Continue acompanhando o mercado</div>
+    <div class="paywall-desc">
+      Você usou suas <strong>gerações gratuitas</strong>. Assine o Radar Semanal para acesso ilimitado à inteligência de mercado de seguro de vida, atualizada toda semana com IA.
+    </div>
+    <div class="paywall-plans">
+      <div class="plan-card" id="plan-monthly" onclick="selectPlan('monthly')">
+        <div class="plan-name">Mensal</div>
+        <div class="plan-price">R$97</div>
+        <div class="plan-period">/mês</div>
+      </div>
+      <div class="plan-card featured selected" id="plan-annual" onclick="selectPlan('annual')">
+        <div class="plan-badge">MAIS POPULAR</div>
+        <div class="plan-name">Anual</div>
+        <div class="plan-price">R$797</div>
+        <div class="plan-period">/ano</div>
+        <div class="plan-saving">↓ Economize R$367</div>
+      </div>
+    </div>
+    <button class="btn-subscribe" onclick="goToCheckout()">
+      → Assinar Agora
+    </button>
+    <div class="paywall-fine">
+      🔒 Pagamento seguro via Stripe · Cancele quando quiser
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <span class="controls-label">Setor:</span>
+  <select id="nicho-select" style="font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;border:1.5px solid var(--border);background:var(--paper);color:var(--ink);cursor:pointer;outline:none;min-width:220px;">
+    <optgroup label="── Serviços Financeiros ──">
+      <option value="seguro de vida">🛡️ Seguro de Vida</option>
+      <option value="planos de saúde e seguros saúde">🏥 Planos de Saúde</option>
+      <option value="previdência privada e fundos de pensão">📈 Previdência Privada</option>
+      <option value="fintechs e bancos digitais">💳 Fintechs & Bancos Digitais</option>
+      <option value="consórcios">🤝 Consórcios</option>
+      <option value="crédito e empréstimos pessoais">💰 Crédito & Empréstimos</option>
+    </optgroup>
+    <optgroup label="── Outros Setores ──">
+      <option value="energia solar e energias renováveis">☀️ Energia Solar</option>
+      <option value="agronegócio e agtech">🌾 Agronegócio & Agtech</option>
+      <option value="mercado imobiliário e proptech">🏠 Mercado Imobiliário</option>
+      <option value="educação e edtech">🎓 Educação & Edtech</option>
+      <option value="saúde e healthtech">⚕️ Saúde & Healthtech</option>
+      <option value="varejo e e-commerce">🛒 Varejo & E-commerce</option>
+      <option value="logística e supply chain">🚚 Logística & Supply Chain</option>
+      <option value="tecnologia e SaaS">💻 Tecnologia & SaaS</option>
+    </optgroup>
+  </select>
+  <button class="btn-generate" id="btn-main" onclick="generateReport()">
+    <span>▶</span> Gerar Radar do Setor
+  </button>
+  <button class="btn-pdf" onclick="printReport()">⬇ Salvar / Imprimir</button>
+  <div class="usage-pill" id="usage-pill">
+    <div class="usage-bar"><div class="usage-bar-fill" id="usage-bar-fill"></div></div>
+    <span class="usage-label" id="usage-label"></span>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <div class="main-col" id="main-content">
+
+    <!-- PLACEHOLDER INITIAL -->
+    <div id="placeholder-view">
+      <div class="placeholder-card">
+        <div class="placeholder-icon">📡</div>
+        <div class="placeholder-title">Escolha um setor e gere seu radar</div>
+        <div class="placeholder-text">
+          Selecione um setor no menu acima e clique em <strong>Gerar Radar do Setor</strong>.<br>
+          A IA pesquisa e compila novidades, concorrência, oportunidades e tendências<br>
+          do mercado escolhido — Brasil e global — em menos de 2 minutos.
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT CONTENT (hidden until generated) -->
+    <div id="report-view" style="display:none;">
+      <div class="section" id="sec-novidades">
+        <div class="section-header">
+          <div class="section-icon">📰</div>
+          <div class="section-title">Novidades da Semana</div>
+          <span class="section-tag">News</span>
+        </div>
+        <div class="content-area" id="content-novidades"></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section" id="sec-concorrencia">
+        <div class="section-header">
+          <div class="section-icon">⚔️</div>
+          <div class="section-title">Movimentos da Concorrência</div>
+          <span class="section-tag">Competitive Intel</span>
+        </div>
+        <div class="content-area" id="content-concorrencia"></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section" id="sec-oportunidades">
+        <div class="section-header">
+          <div class="section-icon">💡</div>
+          <div class="section-title">Oportunidades de Mercado</div>
+          <span class="section-tag">Opportunities</span>
+        </div>
+        <div class="content-area" id="content-oportunidades"></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="section" id="sec-tendencias">
+        <div class="section-header">
+          <div class="section-icon">🔭</div>
+          <div class="section-title">Tendências para os Próximos Anos</div>
+          <span class="section-tag">Trends 2025–2030</span>
+        </div>
+        <div class="content-area" id="content-tendencias"></div>
+      </div>
+    </div>
+
+  </div><!-- /main-col -->
+
+  <!-- SIDEBAR -->
+  <div class="side-col">
+
+    <div class="widget">
+      <div class="widget-title">📊 Indicadores de Referência</div>
+      <div id="sidebar-stats">
+        <div class="stat-row"><span class="stat-label">Penetração BR (% PIB)</span><span class="stat-value">~3,8%</span></div>
+        <div class="stat-row"><span class="stat-label">Crescim. setor (2024)</span><span class="stat-value stat-up">▲ 12%</span></div>
+        <div class="stat-row"><span class="stat-label">Mercado global</span><span class="stat-value">US$ 3,4 tri</span></div>
+        <div class="stat-row"><span class="stat-label">Prêmio médio BR</span><span class="stat-value">R$ 1.620/ano</span></div>
+        <div class="stat-row"><span class="stat-label">Taxa de sinistro BR</span><span class="stat-value">~45%</span></div>
+      </div>
+    </div>
+
+    <div class="widget">
+      <div class="widget-title">🏷️ Temas em Destaque</div>
+      <div class="keywords" id="sidebar-keywords">
+        <span class="kw gold" id="kw1">Selecione</span>
+        <span class="kw" id="kw2">um setor</span>
+        <span class="kw" id="kw3">para ver</span>
+        <span class="kw gold" id="kw4">os temas</span>
+        <span class="kw" id="kw5">em destaque</span>
+      </div>
+    </div>
+
+    <div class="widget" id="sidebar-insight" style="display:none;">
+      <div class="widget-title">💬 Insight da Semana</div>
+      <div id="sidebar-insight-text" style="font-family:'Playfair Display',serif;font-style:italic;font-size:14px;line-height:1.7;color:var(--ink);"></div>
+    </div>
+
+    <div class="widget">
+      <div class="widget-title">📅 Histórico de Edições</div>
+      <div id="history-list" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:2.0;">
+        Nenhuma edição gerada ainda.
+      </div>
+    </div>
+
+  </div>
+</div><!-- /layout -->
+
+<footer class="footer">
+  <span>© SEGURO DE VIDA RADAR SEMANAL · INTELIGÊNCIA GERADA POR IA</span>
+  <span>Dados e análises de uso interno · Atualizado semanalmente</span>
+</footer>
+
+<script>
+  // ════════════════════════════════════════
+  // CONFIGURAÇÃO — edite após criar contas
+  // ════════════════════════════════════════
+  const FREE_LIMIT = 999; // uso pessoal — sem limite
+  const CHECKOUT_URL_MONTHLY = '';
+  const CHECKOUT_URL_ANNUAL  = '';
+
+  // Temas por nicho para sidebar
+  const NICHO_KEYWORDS = {
+    'seguro de vida': ['Longevidade','Insurtech','Open Insurance','ESG','IA & Dados','Regulação'],
+    'planos de saúde e seguros saúde': ['ANS','Telemedicina','Sinistralidade','Healthtech','ESG','Cobertura'],
+    'previdência privada e fundos de pensão': ['PGBL','VGBL','Taxa de juros','Longevidade','ESG','Portabilidade'],
+    'fintechs e bancos digitais': ['Open Finance','Pix','BaaS','Crédito','Regulação','IA'],
+    'consórcios': ['BACEN','Carta de crédito','Taxa de adesão','Imóveis','Veículos','Fraude'],
+    'crédito e empréstimos pessoais': ['Inadimplência','FGTS','CDC','Juros','Open Finance','Score'],
+    'energia solar e energias renováveis': ['ANEEL','Microgeração','GD','Financiamento','ESG','Custo'],
+    'agronegócio e agtech': ['Safra','MAPA','Crédito Rural','Clima','Exportação','Tecnologia'],
+    'mercado imobiliário e proptech': ['SELIC','FII','Lançamentos','Aluguel','Incorporação','IA'],
+    'educação e edtech': ['MEC','EAD','IA','Mensalidade','FIES','Internacionalização'],
+    'saúde e healthtech': ['ANVISA','Telemedicina','IA diagnóstico','Wearables','Dados','Regulação'],
+    'varejo e e-commerce': ['LGPD','Marketplace','Logística','Frete','IA','Omnichannel'],
+    'logística e supply chain': ['ANTT','Frete','Last mile','IA','Rastreamento','Sustentabilidade'],
+    'tecnologia e SaaS': ['IA Generativa','Cloud','Cibersegurança','SaaS','Startups','M&A'],
+  };
+  // ════════════════════════════════════════
+
+  const now = new Date();
+  const weekNum = getWeekNumber(now);
+  document.getElementById('edition-num').textContent = `Sem. ${weekNum}/${now.getFullYear()}`;
+  document.getElementById('edition-date').textContent = now.toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+
+  function getWeekNumber(d) {
+    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+    return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+  }
+
+  // ── History storage ──
+  function saveHistory() {
+    const key = `radar_${weekNum}_${now.getFullYear()}`;
+    const list = JSON.parse(localStorage.getItem('radar_history') || '[]');
+    if (!list.find(e => e.key === key)) {
+      list.unshift({ key, label: `Sem. ${weekNum}/${now.getFullYear()} · ${now.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}` });
+      localStorage.setItem('radar_history', JSON.stringify(list.slice(0, 8)));
+    }
+    renderHistory();
+  }
+  function renderHistory() {
+    const list = JSON.parse(localStorage.getItem('radar_history') || '[]');
+    const el = document.getElementById('history-list');
+    if (!list.length) { el.textContent = 'Nenhuma edição gerada ainda.'; return; }
+    el.innerHTML = list.map(e => `<div style="padding:4px 0;border-bottom:1px solid rgba(200,191,173,.3)">◆ ${e.label}</div>`).join('');
+  }
+
+  // ── Usage & Paywall ──
+  function getUsage() { return parseInt(localStorage.getItem('radar_usage') || '0'); }
+  function incrementUsage() { localStorage.setItem('radar_usage', getUsage() + 1); }
+  function isPremium() {
+    return (typeof MemberSpace !== 'undefined' && MemberSpace.member && MemberSpace.member.planIds && MemberSpace.member.planIds.length > 0)
+      || localStorage.getItem('radar_premium') === 'true';
+  }
+  function canGenerate() { return isPremium() || getUsage() < FREE_LIMIT; }
+
+  function updateUsageUI() {
+    const used = getUsage();
+    const remaining = Math.max(0, FREE_LIMIT - used);
+    const pct = Math.min(100, (used / FREE_LIMIT) * 100);
+    const fill = document.getElementById('usage-bar-fill');
+    const label = document.getElementById('usage-label');
+    const banner = document.getElementById('trial-banner');
+
+    if (isPremium()) {
+      document.getElementById('usage-pill').innerHTML = '<span style="color:#1a7a4a;font-family:DM Mono,monospace;font-size:11px;">✓ Acesso Premium</span>';
+      banner.style.display = 'none';
+      return;
+    }
+    fill.style.width = pct + '%';
+    if (pct >= 100) fill.classList.add('danger');
+    label.textContent = remaining + ' grátis restante' + (remaining !== 1 ? 's' : '');
+    banner.style.display = 'block';
+    document.getElementById('trial-remaining').textContent = remaining;
+  }
+
+  let selectedPlan = 'annual';
+  function showPaywall() { document.getElementById('paywall-overlay').classList.add('active'); }
+  function closePaywall() { document.getElementById('paywall-overlay').classList.remove('active'); }
+  function selectPlan(plan) {
+    selectedPlan = plan;
+    document.getElementById('plan-monthly').classList.toggle('selected', plan === 'monthly');
+    document.getElementById('plan-annual').classList.toggle('selected', plan === 'annual');
+  }
+  function goToCheckout() {
+    window.open(selectedPlan === 'annual' ? CHECKOUT_URL_ANNUAL : CHECKOUT_URL_MONTHLY, '_blank');
+  }
+
+  // ── Skeleton loader ──
+  function showSkeleton(id) {
+    document.getElementById(id).innerHTML = `
+      <div class="skeleton wide"></div>
+      <div class="skeleton wide"></div>
+      <div class="skeleton medium"></div>
+      <div class="skeleton wide" style="margin-top:16px"></div>
+      <div class="skeleton wide"></div>
+      <div class="skeleton short"></div>
+    `;
+  }
+
+  // ── Main generate ──
+  async function generateReport() {
+    if (!canGenerate()) { showPaywall(); return; }
+
+    const nichoSel = document.getElementById('nicho-select');
+    const nicho = nichoSel.value;
+    const nichoLabel = nichoSel.options[nichoSel.selectedIndex].text.replace(/^[^a-zA-ZÀ-ÿ]+/, '').trim();
+
+    // Update sidebar keywords for this nicho
+    const kws = NICHO_KEYWORDS[nicho] || [];
+    ['kw1','kw2','kw3','kw4','kw5'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = kws[i] || '';
+    });
+
+    document.getElementById('edition-num').textContent = nichoLabel + ' · Sem. ' + weekNum + '/' + now.getFullYear();
+
+    const btn = document.getElementById('btn-main');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin">↻</span> Pesquisando...';
+
+    document.getElementById('placeholder-view').style.display = 'none';
+    document.getElementById('report-view').style.display = 'block';
+
+    ['content-novidades','content-concorrencia','content-oportunidades','content-tendencias'].forEach(showSkeleton);
+
+    const dateStr = now.toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'});
+
+    const sections = [
+      {
+        id: 'content-novidades',
+        prompt: 'Você é analista sênior de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro um resumo executivo das PRINCIPAIS NOVIDADES E NOTÍCIAS da semana no mercado de ' + nicho + ', cobrindo Brasil e global. Inclua: lançamentos de produtos ou serviços, mudanças regulatórias, fusões e aquisições, resultados financeiros dos principais players, e movimentos de startups relevantes do setor. Seja específico, factual e use dados quando possível. Formate em HTML com <p> e <ul><li>. Inclua pelo menos um bloco <div class=\'highlight\'> com um dado de impacto.'
+      },
+      {
+        id: 'content-concorrencia',
+        prompt: 'Você é analista sênior de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro uma análise dos MOVIMENTOS DA CONCORRÊNCIA no mercado de ' + nicho + ' esta semana. Cubra: principais players brasileiros e globais, lançamentos de produtos concorrentes, estratégias de distribuição e precificação, parcerias estratégicas, e movimentos digitais. Formate em HTML com <p> e <ul><li>. Use <strong> para nomes de empresas.'
+      },
+      {
+        id: 'content-oportunidades',
+        prompt: 'Você é consultor estratégico de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro as principais OPORTUNIDADES DE MERCADO no segmento de ' + nicho + ' identificadas esta semana. Aborde: segmentos sub-atendidos, oportunidades digitais, novas parcerias, nichos emergentes, e brechas competitivas. Seja propositivo e prático. Formate em HTML com <p> e <ul><li>. Inclua um bloco <div class=\'highlight\'> com a oportunidade de maior destaque.'
+      },
+      {
+        id: 'content-tendencias',
+        prompt: 'Você é especialista em tendências de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro as principais TENDÊNCIAS PARA OS PRÓXIMOS ANOS (2025-2030) no mercado de ' + nicho + ', global e brasileiro. Aborde: tecnologia e IA, mudanças de comportamento do consumidor, regulação, sustentabilidade ESG, novos modelos de negócio, e projeções de crescimento do setor. Inclua dados prospectivos. Formate em HTML com <p> e <ul><li>.'
+      }
+    ];
+
+    let insightText = '';
+
+    for (const sec of sections) {
+      try {
+        const resp = await fetch('/api/radar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: sec.prompt }]
+          })
+        });
+        const data = await resp.json();
+        const html = data.content
+          .filter(b => b.type === 'text')
+          .map(b => b.text)
+          .join('');
+        document.getElementById(sec.id).innerHTML = html || '<p>Conteúdo não disponível.</p>';
+
+        if (sec.id === 'content-novidades' && html) {
+          // extract first sentence as insight
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          const text = tmp.textContent || '';
+          const sentences = text.match(/[^.!?]+[.!?]/g) || [];
+          insightText = sentences.slice(0, 2).join(' ').trim();
+        }
+      } catch(e) {
+        document.getElementById(sec.id).innerHTML = '<p>Erro ao carregar esta seção. Tente novamente.</p>';
+      }
+    }
+
+    if (insightText) {
+      document.getElementById('sidebar-insight').style.display = 'block';
+      document.getElementById('sidebar-insight-text').textContent = `"${insightText}"`;
+    }
+
+    if (!isPremium()) incrementUsage();
+    updateUsageUI();
+    saveHistory();
+    renderHistory();
+    btn.disabled = false;
+    btn.innerHTML = '<span>↻</span> Atualizar Resumo';
+
+    if (!isPremium() && getUsage() >= FREE_LIMIT) {
+      setTimeout(showPaywall, 2500);
+    }
+  }
+
+  function printReport() { window.print(); }
+
+  // ── Init ──
+  updateUsageUI();
+  renderHistory();
+
+</script>
+
+<style>
+@media print {
+  .controls, .ticker-bar, footer { display: none; }
+  .layout { grid-template-columns: 1fr; }
+  .side-col { display: none; }
+  .main-col { padding: 0; border: none; }
+  body { background: white; }
+  .section-icon { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</body>
+</html>

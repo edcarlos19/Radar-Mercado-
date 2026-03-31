@@ -1,0 +1,7 @@
+[build]
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/radar"
+  to = "/.netlify/functions/radar"
+  status = 200
