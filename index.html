@@ -844,6 +844,9 @@
   // ════════════════════════════════════════
   // CONFIGURAÇÃO — edite após criar contas
   // ════════════════════════════════════════
+  // ════════════════════════════════════════
+  // SUA CHAVE DE API — cole aqui
+    // ════════════════════════════════════════
   const FREE_LIMIT = 999; // uso pessoal — sem limite
   const CHECKOUT_URL_MONTHLY = '';
   const CHECKOUT_URL_ANNUAL  = '';
@@ -978,54 +981,32 @@
 
     const dateStr = now.toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'});
 
-    const sections = [
-      {
-        id: 'content-novidades',
-        prompt: 'Você é analista sênior de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro um resumo executivo das PRINCIPAIS NOVIDADES E NOTÍCIAS da semana no mercado de ' + nicho + ', cobrindo Brasil e global. Inclua: lançamentos de produtos ou serviços, mudanças regulatórias, fusões e aquisições, resultados financeiros dos principais players, e movimentos de startups relevantes do setor. Seja específico, factual e use dados quando possível. Formate em HTML com <p> e <ul><li>. Inclua pelo menos um bloco <div class=\'highlight\'> com um dado de impacto.'
-      },
-      {
-        id: 'content-concorrencia',
-        prompt: 'Você é analista sênior de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro uma análise dos MOVIMENTOS DA CONCORRÊNCIA no mercado de ' + nicho + ' esta semana. Cubra: principais players brasileiros e globais, lançamentos de produtos concorrentes, estratégias de distribuição e precificação, parcerias estratégicas, e movimentos digitais. Formate em HTML com <p> e <ul><li>. Use <strong> para nomes de empresas.'
-      },
-      {
-        id: 'content-oportunidades',
-        prompt: 'Você é consultor estratégico de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro as principais OPORTUNIDADES DE MERCADO no segmento de ' + nicho + ' identificadas esta semana. Aborde: segmentos sub-atendidos, oportunidades digitais, novas parcerias, nichos emergentes, e brechas competitivas. Seja propositivo e prático. Formate em HTML com <p> e <ul><li>. Inclua um bloco <div class=\'highlight\'> com a oportunidade de maior destaque.'
-      },
-      {
-        id: 'content-tendencias',
-        prompt: 'Você é especialista em tendências de mercado. Data de hoje: ' + dateStr + '. Escreva em português brasileiro as principais TENDÊNCIAS PARA OS PRÓXIMOS ANOS (2025-2030) no mercado de ' + nicho + ', global e brasileiro. Aborde: tecnologia e IA, mudanças de comportamento do consumidor, regulação, sustentabilidade ESG, novos modelos de negócio, e projeções de crescimento do setor. Inclua dados prospectivos. Formate em HTML com <p> e <ul><li>.'
-      }
-    ];
-
+    // Single API call — envia nicho e data para o servidor
     let insightText = '';
-
-    for (const sec of sections) {
-      try {
-        const resp = await fetch('/api/radar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: sec.prompt }]
-          })
-        });
-        const data = await resp.json();
-        const html = data.content
-          .filter(b => b.type === 'text')
-          .map(b => b.text)
-          .join('');
-        document.getElementById(sec.id).innerHTML = html || '<p>Conteúdo não disponível.</p>';
-
-        if (sec.id === 'content-novidades' && html) {
-          // extract first sentence as insight
-          const tmp = document.createElement('div');
-          tmp.innerHTML = html;
-          const text = tmp.textContent || '';
-          const sentences = text.match(/[^.!?]+[.!?]/g) || [];
-          insightText = sentences.slice(0, 2).join(' ').trim();
-        }
-      } catch(e) {
-        document.getElementById(sec.id).innerHTML = '<p>Erro ao carregar esta seção. Tente novamente.</p>';
+    try {
+      const resp = await fetch('/api/radar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nicho, dateStr })
+      });
+      const result = await resp.json();
+      if (result.success && result.data) {
+        const d = result.data;
+        document.getElementById('content-novidades').innerHTML    = d.novidades    || '<p>Sem conteúdo.</p>';
+        document.getElementById('content-concorrencia').innerHTML = d.concorrencia || '<p>Sem conteúdo.</p>';
+        document.getElementById('content-oportunidades').innerHTML= d.oportunidades|| '<p>Sem conteúdo.</p>';
+        document.getElementById('content-tendencias').innerHTML   = d.tendencias   || '<p>Sem conteúdo.</p>';
+        const tmp = document.createElement('div');
+        tmp.innerHTML = d.novidades || '';
+        const sentences = (tmp.textContent || '').match(/[^.!?]+[.!?]/g) || [];
+        insightText = sentences.slice(0, 2).join(' ').trim();
+      } else {
+        throw new Error(result.error || 'Erro na resposta do servidor');
       }
+    } catch(e) {
+      ['content-novidades','content-concorrencia','content-oportunidades','content-tendencias'].forEach(id => {
+        document.getElementById(id).innerHTML = '<p style="color:#b5341a">Erro: ' + e.message + '</p>';
+      });
     }
 
     if (insightText) {
