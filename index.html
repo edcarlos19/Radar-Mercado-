@@ -634,6 +634,59 @@
     .side-col { padding: 24px 20px; border-top: 1px solid var(--border); }
     .footer { padding: 16px 20px; }
   }
+
+  /* ── MODAL CADASTRO ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,17,23,0.85);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: var(--paper);
+    border-top: 5px solid var(--teal);
+    max-width: 440px;
+    width: 90%;
+    padding: 36px;
+    position: relative;
+    animation: slideUp .3s ease;
+  }
+  .modal-label { font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--teal);text-transform:uppercase;margin-bottom:10px; }
+  .modal-title { font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:10px; }
+  .modal-desc { font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px; }
+  .modal-input {
+    width:100%;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;
+    border:1.5px solid var(--border);background:var(--paper);color:var(--ink);
+    box-sizing:border-box;margin-bottom:12px;outline:none;
+  }
+  .modal-input:focus { border-color:var(--teal); }
+  .modal-select {
+    width:100%;padding:10px 14px;font-family:'DM Mono',monospace;font-size:12px;
+    border:1.5px solid var(--border);background:var(--paper);color:var(--ink);
+    box-sizing:border-box;margin-bottom:20px;outline:none;cursor:pointer;
+  }
+  .btn-cadastrar {
+    width:100%;background:var(--teal);color:var(--paper);border:none;
+    padding:13px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:1px;
+    cursor:pointer;text-transform:uppercase;transition:background .2s;
+  }
+  .btn-cadastrar:hover { background:var(--ink); }
+  .btn-cadastrar:disabled { background:var(--muted);cursor:not-allowed; }
+  .modal-close { position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted); }
+  .modal-msg { text-align:center;margin-top:12px;font-family:'DM Mono',monospace;font-size:11px; }
+  .modal-msg.ok { color:#1a7a4a; }
+  .modal-msg.erro { color:var(--red); }
+  .btn-email-signup {
+    background:var(--teal);color:var(--paper);border:none;padding:10px 18px;
+    font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;cursor:pointer;transition:background .2s;
+  }
+  .btn-email-signup:hover { background:var(--ink); }
+
 </style>
 </head>
 <body>
@@ -698,6 +751,41 @@
   </div>
 </div>
 
+
+<!-- MODAL CADASTRO EMAIL -->
+<div class="modal-overlay" id="modal-cadastro">
+  <div class="modal-box">
+    <button class="modal-close" onclick="fecharCadastro()">✕</button>
+    <div class="modal-label">● Receba toda segunda-feira</div>
+    <div class="modal-title">Cadastre seu email</div>
+    <div class="modal-desc">Receba o Radar de Mercado do seu setor automaticamente toda segunda-feira, direto no seu email.</div>
+    <input class="modal-input" id="cad-nome" type="text" placeholder="Seu nome" />
+    <input class="modal-input" id="cad-email" type="email" placeholder="Seu email" />
+    <select class="modal-select" id="cad-setor">
+      <optgroup label="── Serviços Financeiros ──">
+        <option value="seguro de vida">🛡️ Seguro de Vida</option>
+        <option value="planos de saúde e seguros saúde">🏥 Planos de Saúde</option>
+        <option value="previdência privada e fundos de pensão">📈 Previdência Privada</option>
+        <option value="fintechs e bancos digitais">💳 Fintechs & Bancos Digitais</option>
+        <option value="consórcios">🤝 Consórcios</option>
+        <option value="crédito e empréstimos pessoais">💰 Crédito & Empréstimos</option>
+      </optgroup>
+      <optgroup label="── Outros Setores ──">
+        <option value="energia solar e energias renováveis">☀️ Energia Solar</option>
+        <option value="agronegócio e agtech">🌾 Agronegócio & Agtech</option>
+        <option value="mercado imobiliário e proptech">🏠 Mercado Imobiliário</option>
+        <option value="educação e edtech">🎓 Educação & Edtech</option>
+        <option value="saúde e healthtech">⚕️ Saúde & Healthtech</option>
+        <option value="varejo e e-commerce">🛒 Varejo & E-commerce</option>
+        <option value="logística e supply chain">🚚 Logística & Supply Chain</option>
+        <option value="tecnologia e SaaS">💻 Tecnologia & SaaS</option>
+      </optgroup>
+    </select>
+    <button class="btn-cadastrar" id="btn-cadastrar" onclick="cadastrarEmail()">→ Quero Receber Toda Segunda</button>
+    <div class="modal-msg" id="modal-msg"></div>
+  </div>
+</div>
+
 <!-- CONTROLS -->
 <div class="controls">
   <span class="controls-label">Setor:</span>
@@ -725,6 +813,7 @@
     <span>▶</span> Gerar Radar do Setor
   </button>
   <button class="btn-pdf" onclick="printReport()">⬇ Salvar / Imprimir</button>
+  <button class="btn-email-signup" onclick="abrirCadastro()">✉ Receber por Email</button>
   <div class="usage-pill" id="usage-pill">
     <div class="usage-bar"><div class="usage-bar-fill" id="usage-bar-fill"></div></div>
     <span class="usage-label" id="usage-label"></span>
@@ -1027,6 +1116,47 @@
   }
 
   function printReport() { window.print(); }
+
+  // ── Cadastro de email ──
+  function abrirCadastro() { document.getElementById('modal-cadastro').classList.add('active'); }
+  function fecharCadastro() { document.getElementById('modal-cadastro').classList.remove('active'); }
+
+  async function cadastrarEmail() {
+    const nome = document.getElementById('cad-nome').value.trim();
+    const email = document.getElementById('cad-email').value.trim();
+    const setor = document.getElementById('cad-setor').value;
+    const msg = document.getElementById('modal-msg');
+    const btn = document.getElementById('btn-cadastrar');
+
+    if (!nome || !email) { msg.className='modal-msg erro'; msg.textContent='Preencha nome e email.'; return; }
+    if (!email.includes('@')) { msg.className='modal-msg erro'; msg.textContent='Email inválido.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Cadastrando...';
+    msg.textContent = '';
+
+    try {
+      const resp = await fetch('/api/cadastrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, email, setor })
+      });
+      const result = await resp.json();
+      if (result.success) {
+        msg.className = 'modal-msg ok';
+        msg.textContent = '✓ ' + result.message;
+        btn.textContent = '✓ Cadastrado!';
+      } else {
+        throw new Error(result.error);
+      }
+    } catch(e) {
+      msg.className = 'modal-msg erro';
+      msg.textContent = 'Erro: ' + e.message;
+      btn.disabled = false;
+      btn.textContent = '→ Quero Receber Toda Segunda';
+    }
+  }
+
 
   // ── Init ──
   updateUsageUI();
