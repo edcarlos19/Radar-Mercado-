@@ -211,28 +211,34 @@ function gerarEmailHTML(nome, nicho, dateStr, data) {
 </body></html>`;
 }
 
-// ── Envia email pelo Resend ──
+// ── Envia email pelo Brevo ──
 function enviarEmail(para, assunto, htmlContent) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
-      from: 'Radar de Mercado <onboarding@resend.dev>',
-      to: [para],
+      sender: { name: 'Radar de Mercado', email: 'noreply@radar-mercado.com' },
+      to: [{ email: para }],
       subject: assunto,
-      html: htmlContent
+      htmlContent: htmlContent
     });
     const req = https.request({
-      hostname: 'api.resend.com',
-      path: '/emails',
+      hostname: 'api.brevo.com',
+      path: '/v3/smtp/email',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'api-key': process.env.BREVO_API_KEY,
         'Content-Length': Buffer.byteLength(payload)
       }
     }, (res) => {
       let data = '';
       res.on('data', c => data += c);
-      res.on('end', () => resolve(JSON.parse(data)));
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          console.log('Brevo response:', JSON.stringify(parsed));
+          resolve(parsed);
+        } catch(e) { resolve(data); }
+      });
     });
     req.on('error', reject);
     req.write(payload);
