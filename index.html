@@ -687,7 +687,53 @@
   }
   .btn-email-signup:hover { background:var(--ink); }
 
+
+  /* ── FONTES ── */
+  .fontes {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: var(--cream);
+    border-left: 3px solid var(--border);
+    font-size: 13px;
+  }
+  .fontes strong { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .fontes ul { padding-left: 16px; margin-top: 6px; }
+  .fontes li { margin-bottom: 4px; }
+  .fontes a { color: var(--teal); text-decoration: none; }
+  .fontes a:hover { text-decoration: underline; }
+  .fontes-consolidadas ul { padding-left: 0; list-style: none; }
+  .fontes-consolidadas li { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .fonte-tag { background: var(--ink); color: var(--paper); font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 7px; white-space: nowrap; }
+
+
+  /* ── GRÁFICOS ── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+  }
+  .chart-card {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    padding: 16px;
+  }
+  .chart-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .chart-wrap { position: relative; height: 200px; }
+  @media (max-width: 768px) {
+    .chart-grid { grid-template-columns: 1fr; }
+  }
+
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -879,6 +925,19 @@
           <span class="section-tag">Trends 2025–2030</span>
         </div>
         <div class="content-area" id="content-tendencias"></div>
+      </div>
+    
+      <hr class="divider">
+
+      <div class="section" id="sec-fontes">
+        <div class="section-header">
+          <div class="section-icon">📚</div>
+          <div class="section-title">Fontes e Referências</div>
+          <span class="section-tag">Sources</span>
+        </div>
+        <div class="content-area fontes-consolidadas" id="content-fontes">
+          <p style="color:var(--muted);font-size:13px;">As fontes aparecerão aqui após gerar o radar.</p>
+        </div>
       </div>
     </div>
 
@@ -1085,6 +1144,14 @@
         document.getElementById('content-concorrencia').innerHTML = d.concorrencia || '<p>Sem conteúdo.</p>';
         document.getElementById('content-oportunidades').innerHTML= d.oportunidades|| '<p>Sem conteúdo.</p>';
         document.getElementById('content-tendencias').innerHTML   = d.tendencias   || '<p>Sem conteúdo.</p>';
+        document.getElementById('content-fontes').innerHTML = d.fontes || '<p>Fontes listadas em cada seção acima.</p>';
+        // Render charts
+        setTimeout(() => {
+          renderizarGraficos('novidades',    d.novidades_graficos    || []);
+          renderizarGraficos('concorrencia', d.concorrencia_graficos || []);
+          renderizarGraficos('oportunidades',d.oportunidades_graficos|| []);
+          renderizarGraficos('tendencias',   d.tendencias_graficos   || []);
+        }, 100);
         const tmp = document.createElement('div');
         tmp.innerHTML = d.novidades || '';
         const sentences = (tmp.textContent || '').match(/[^.!?]+[.!?]/g) || [];
@@ -1113,6 +1180,94 @@
     if (!isPremium() && getUsage() >= FREE_LIMIT) {
       setTimeout(showPaywall, 2500);
     }
+  }
+
+
+  // ── Renderiza gráficos ──
+  const chartInstances = {};
+
+  function renderizarGraficos(sectionId, graficos) {
+    const section = document.getElementById('content-' + sectionId);
+    if (!section || !graficos || graficos.length === 0) return;
+
+    // Remove old charts
+    const oldGrid = section.querySelector('.chart-grid');
+    if (oldGrid) oldGrid.remove();
+    if (chartInstances[sectionId]) {
+      chartInstances[sectionId].forEach(c => c.destroy());
+      chartInstances[sectionId] = [];
+    }
+
+    const grid = document.createElement('div');
+    grid.className = 'chart-grid';
+
+    graficos.forEach((g, i) => {
+      const card = document.createElement('div');
+      card.className = 'chart-card';
+
+      const title = document.createElement('div');
+      title.className = 'chart-title';
+      title.textContent = g.titulo;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'chart-wrap';
+
+      const canvas = document.createElement('canvas');
+      canvas.id = sectionId + '_chart_' + i;
+      wrap.appendChild(canvas);
+      card.appendChild(title);
+      card.appendChild(wrap);
+      grid.appendChild(card);
+    });
+
+    // Insert chart grid before the text content
+    section.insertBefore(grid, section.firstChild);
+
+    // Render each chart after DOM insertion
+    graficos.forEach((g, i) => {
+      const canvas = document.getElementById(sectionId + '_chart_' + i);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const cores = g.tipo === 'doughnut'
+        ? ['#0d1117','#1a5f7a','#c9a84c','#b5341a','#6b6357','#1a7a4a','#e8d4a0']
+        : [g.cor || '#1a5f7a'];
+
+      const chart = new Chart(ctx, {
+        type: g.tipo === 'doughnut' ? 'doughnut' : g.tipo,
+        data: {
+          labels: g.labels,
+          datasets: [{
+            data: g.dados,
+            backgroundColor: g.tipo === 'doughnut' ? cores : (g.cor || '#1a5f7a') + '33',
+            borderColor: g.tipo === 'doughnut' ? cores : (g.cor || '#1a5f7a'),
+            borderWidth: 2,
+            fill: g.tipo === 'line',
+            tension: 0.4,
+            pointBackgroundColor: g.cor || '#1a5f7a',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: g.tipo === 'doughnut',
+              position: 'bottom',
+              labels: { font: { family: 'DM Sans', size: 11 }, color: '#6b6357', padding: 8 }
+            }
+          },
+          scales: g.tipo === 'doughnut' ? {} : {
+            x: { ticks: { font: { family: 'DM Mono', size: 10 }, color: '#6b6357' }, grid: { color: 'rgba(200,191,173,0.3)' } },
+            y: { ticks: { font: { family: 'DM Mono', size: 10 }, color: '#6b6357' }, grid: { color: 'rgba(200,191,173,0.3)' } }
+          }
+        }
+      });
+
+      if (!chartInstances[sectionId]) chartInstances[sectionId] = [];
+      chartInstances[sectionId].push(chart);
+    });
   }
 
   function printReport() { window.print(); }
