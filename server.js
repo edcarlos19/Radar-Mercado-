@@ -97,12 +97,99 @@ function callAnthropic(prompt) {
 // ── Gera cada seção ──
 async function gerarSecao(nicho, dateStr, tipo) {
   const prompts = {
-    novidades: `Você é analista sênior de mercado. Data: ${dateStr}. Escreva em português brasileiro as PRINCIPAIS NOVIDADES E NOTÍCIAS recentes do mercado de "${nicho}". Use <p> e <ul><li>. Inclua um <div class='highlight'> com um dado de impacto. Retorne APENAS HTML, sem markdown.`,
-    concorrencia: `Você é analista sênior de mercado. Data: ${dateStr}. Escreva em português brasileiro os MOVIMENTOS DA CONCORRÊNCIA no mercado de "${nicho}". Cite empresas em <strong>. Use <p> e <ul><li>. Retorne APENAS HTML, sem markdown.`,
-    oportunidades: `Você é consultor estratégico. Data: ${dateStr}. Escreva em português brasileiro as OPORTUNIDADES DE MERCADO em "${nicho}". Use <p>, <ul><li> e um <div class='highlight'>. Retorne APENAS HTML, sem markdown.`,
-    tendencias: `Você é especialista em tendências. Data: ${dateStr}. Escreva em português brasileiro as TENDÊNCIAS 2025-2030 do mercado de "${nicho}". Use <p> e <ul><li>. Retorne APENAS HTML, sem markdown.`
+    novidades: `Você é analista sênior de mercado. Data: ${dateStr}. Analise o mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
+{
+  "html": "<p>Resumo breve das principais novidades em 2-3 parágrafos curtos.</p><ul><li>Novidade 1</li><li>Novidade 2</li><li>Novidade 3</li></ul><div class='highlight'>Dado de impacto aqui</div><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
+  "graficos": [
+    {
+      "titulo": "Título do gráfico 1 (ex: Crescimento do Mercado %)",
+      "tipo": "bar",
+      "labels": ["Label1","Label2","Label3","Label4","Label5"],
+      "dados": [10,25,40,30,55],
+      "cor": "#1a5f7a"
+    },
+    {
+      "titulo": "Título do gráfico 2 (ex: Evolução de Prêmios R$ bi)",
+      "tipo": "line",
+      "labels": ["2020","2021","2022","2023","2024"],
+      "dados": [120,145,167,198,234],
+      "cor": "#c9a84c"
+    }
+  ]
+}
+Use dados reais e específicos do setor "${nicho}" para os gráficos. Tipos válidos: bar, line, doughnut.`,
+    concorrencia: `Você é analista sênior de mercado. Data: ${dateStr}. Analise a concorrência no mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
+{
+  "html": "<p>Análise dos movimentos dos principais players.</p><ul><li><strong>Empresa A</strong>: ação tomada</li><li><strong>Empresa B</strong>: ação tomada</li></ul><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
+  "graficos": [
+    {
+      "titulo": "Market Share dos Principais Players (%)",
+      "tipo": "doughnut",
+      "labels": ["Empresa1","Empresa2","Empresa3","Empresa4","Outros"],
+      "dados": [28,22,18,12,20],
+      "cor": "#0d1117"
+    },
+    {
+      "titulo": "Título do gráfico 2 (ex: NPS ou crescimento por player)",
+      "tipo": "bar",
+      "labels": ["Empresa1","Empresa2","Empresa3","Empresa4"],
+      "dados": [45,38,29,52],
+      "cor": "#b5341a"
+    }
+  ]
+}
+Use dados reais de empresas do setor "${nicho}". Tipos válidos: bar, line, doughnut.`,
+    oportunidades: `Você é consultor estratégico. Data: ${dateStr}. Analise as oportunidades no mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
+{
+  "html": "<p>Principais oportunidades identificadas.</p><ul><li>Oportunidade 1</li><li>Oportunidade 2</li><li>Oportunidade 3</li></ul><div class='highlight'>Maior oportunidade em destaque</div><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
+  "graficos": [
+    {
+      "titulo": "Potencial de Mercado por Segmento (R$ bi)",
+      "tipo": "bar",
+      "labels": ["Segmento1","Segmento2","Segmento3","Segmento4"],
+      "dados": [15,28,42,19],
+      "cor": "#1a7a4a"
+    },
+    {
+      "titulo": "Título do gráfico 2 (ex: Taxa de penetração por região %)",
+      "tipo": "doughnut",
+      "labels": ["Região1","Região2","Região3","Região4"],
+      "dados": [35,28,22,15],
+      "cor": "#c9a84c"
+    }
+  ]
+}
+Use dados reais e específicos do setor "${nicho}". Tipos válidos: bar, line, doughnut.`,
+    tendencias: `Você é especialista em tendências. Data: ${dateStr}. Analise as tendências 2025-2030 do mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
+{
+  "html": "<p>Principais tendências para os próximos anos.</p><ul><li>Tendência 1</li><li>Tendência 2</li><li>Tendência 3</li></ul><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
+  "graficos": [
+    {
+      "titulo": "Projeção de Crescimento do Mercado 2025-2030",
+      "tipo": "line",
+      "labels": ["2025","2026","2027","2028","2029","2030"],
+      "dados": [100,118,139,164,193,228],
+      "cor": "#1a5f7a"
+    },
+    {
+      "titulo": "Título do gráfico 2 (ex: adoção de tecnologia % por ano)",
+      "tipo": "bar",
+      "labels": ["2025","2026","2027","2028","2029","2030"],
+      "dados": [22,31,43,57,68,79],
+      "cor": "#c9a84c"
+    }
+  ]
+}`
   };
-  return await callAnthropic(prompts[tipo]);
+  const raw = await callAnthropic(prompts[tipo]);
+  try {
+    const start = raw.indexOf('{');
+    const end = raw.lastIndexOf('}');
+    if (start === -1) return { html: raw, graficos: [] };
+    return JSON.parse(raw.substring(start, end + 1));
+  } catch(e) {
+    return { html: raw, graficos: [] };
+  }
 }
 
 // ── Template de email ──
@@ -300,7 +387,40 @@ const server = http.createServer(async (req, res) => {
           gerarSecao(nicho, dateStr, 'oportunidades'),
           gerarSecao(nicho, dateStr, 'tendencias')
         ]);
-        res.end(JSON.stringify({ success: true, data: { novidades, concorrencia, oportunidades, tendencias } }));
+        // Extrai fontes de cada secao
+        const novHtml = novidades.html || novidades;
+        const conHtml = concorrencia.html || concorrencia;
+        const opHtml = oportunidades.html || oportunidades;
+        const tenHtml = tendencias.html || tendencias;
+        function extrairFontes(html, secao) {
+          const matches = [];
+          const reg = /href=["']([^"']+)["']>([^<]+)<\/a>/g;
+          let m;
+          while ((m = reg.exec(html)) !== null) {
+            if (m[1].startsWith('http')) matches.push({ url: m[1], nome: m[2], secao });
+          }
+          return matches;
+        }
+        const todasFontes = [
+          ...extrairFontes(novHtml, 'Novidades'),
+          ...extrairFontes(conHtml, 'Concorrência'),
+          ...extrairFontes(opHtml, 'Oportunidades'),
+          ...extrairFontes(tenHtml, 'Tendências')
+        ];
+        const fontesUnicas = todasFontes.filter((f, i, arr) => arr.findIndex(x => x.url === f.url) === i);
+        const fontesHTML = fontesUnicas.length > 0
+          ? '<ul>' + fontesUnicas.map(f =>
+              '<li><span style="background:#0d1117;color:#f5f0e8;font-size:10px;padding:2px 7px;margin-right:6px;font-family:monospace;">' + f.secao + '</span><a href="' + f.url + '" target="_blank" style="color:#1a5f7a;">' + f.nome + '</a></li>'
+            ).join('') + '</ul>'
+          : '<p>Fontes listadas em cada seção acima.</p>';
+
+        res.end(JSON.stringify({ success: true, data: {
+          novidades: novHtml, novidades_graficos: novidades.graficos || [],
+          concorrencia: conHtml, concorrencia_graficos: concorrencia.graficos || [],
+          oportunidades: opHtml, oportunidades_graficos: oportunidades.graficos || [],
+          tendencias: tenHtml, tendencias_graficos: tendencias.graficos || [],
+          fontes: fontesHTML
+        } }));
       } catch(e) {
         res.end(JSON.stringify({ success: false, error: e.message }));
       }
