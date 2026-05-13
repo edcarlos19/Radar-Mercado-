@@ -732,6 +732,172 @@
     .chart-grid { grid-template-columns: 1fr; }
   }
 
+
+  /* ── ONEPAGER MODAL ── */
+  .onepager-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,17,23,0.92);
+    z-index: 3000;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-y: auto;
+    padding: 30px 0;
+    backdrop-filter: blur(6px);
+  }
+  .onepager-overlay.active { display: flex; }
+  .onepager-page {
+    background: #fff;
+    width: 794px;
+    max-width: 95vw;
+    min-height: 1123px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .op-close {
+    position: fixed;
+    top: 16px; right: 20px;
+    background: var(--gold);
+    color: var(--ink);
+    border: none;
+    width: 36px; height: 36px;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 3001;
+    font-weight: bold;
+  }
+  .op-print {
+    position: fixed;
+    top: 16px; right: 62px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 0 14px;
+    height: 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    z-index: 3001;
+  }
+
+  /* ── ONEPAGER INTERNALS ── */
+  .op-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 28px 36px 22px;
+    border-bottom: 4px solid var(--gold);
+  }
+  .op-label { font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:6px; }
+  .op-title { font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1.1;margin-bottom:4px; }
+  .op-subtitle { font-size:13px;color:#aaa;font-style:italic; }
+  .op-meta { font-family:'DM Mono',monospace;font-size:10px;color:#666;margin-top:6px; }
+
+  .op-body { padding: 24px 36px; }
+
+  .op-resumo {
+    background: #f5f0e8;
+    border-left: 4px solid var(--gold);
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 22px;
+    font-style: italic;
+  }
+
+  /* KPIs */
+  .op-kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 22px; }
+  .op-kpi {
+    background: #f5f0e8;
+    border-top: 3px solid var(--ink);
+    padding: 12px;
+    text-align: center;
+  }
+  .op-kpi-valor { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--ink);line-height:1; }
+  .op-kpi-unidade { font-family:'DM Mono',monospace;font-size:9px;color:#999;display:block;margin-bottom:2px; }
+  .op-kpi-label { font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;margin-top:4px; }
+  .op-kpi-var { font-family:'DM Mono',monospace;font-size:10px;font-weight:700;margin-top:3px; }
+  .op-kpi-var.up { color:#1a7a4a; }
+  .op-kpi-var.down { color:#b5341a; }
+
+  /* Seção título */
+  .op-sec-title {
+    font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--muted);border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:12px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .op-sec-title span { background:var(--ink);color:var(--paper);padding:2px 8px;font-size:9px; }
+
+  /* Grid principal */
+  .op-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px; }
+  .op-grid-3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px; }
+
+  /* Novidades */
+  .op-novidade {
+    padding: 10px 12px;
+    border-left: 3px solid var(--border);
+    background: #fafafa;
+    margin-bottom: 8px;
+  }
+  .op-novidade.alto { border-color: #b5341a; }
+  .op-novidade.medio { border-color: var(--gold); }
+  .op-novidade.baixo { border-color: #1a7a4a; }
+  .op-nov-titulo { font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px; }
+  .op-nov-desc { font-size:11px;color:#555;line-height:1.4; }
+  .op-nov-tag { font-family:'DM Mono',monospace;font-size:8px;padding:1px 5px;color:#fff;float:right;margin-left:6px; }
+  .op-nov-tag.alto { background:#b5341a; }
+  .op-nov-tag.medio { background:#c9a84c;color:#000; }
+  .op-nov-tag.baixo { background:#1a7a4a; }
+
+  /* Tendências */
+  .op-tend {
+    background:#f5f0e8;
+    padding:10px 12px;
+    border-radius:0;
+    display:flex;gap:10px;align-items:flex-start;
+  }
+  .op-tend-icone { font-size:20px;line-height:1;flex-shrink:0; }
+  .op-tend-titulo { font-size:11px;font-weight:600;color:var(--ink);margin-bottom:2px; }
+  .op-tend-desc { font-size:10px;color:#666;line-height:1.4; }
+  .op-tend-ano { font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);font-weight:700; }
+
+  /* Oportunidade e alerta */
+  .op-oport {
+    background:var(--ink);color:var(--paper);padding:14px 16px;margin-bottom:10px;
+  }
+  .op-oport-label { font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:6px; }
+  .op-oport-text { font-size:13px;line-height:1.5;font-style:italic; }
+  .op-alerta {
+    background:#fff3cd;border-left:4px solid #c9a84c;padding:10px 14px;
+  }
+  .op-alerta-label { font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:#856404;text-transform:uppercase;margin-bottom:4px; }
+  .op-alerta-text { font-size:12px;color:#533f03;line-height:1.5; }
+
+  /* Charts no onepager */
+  .op-chart-wrap { position:relative;height:160px;background:#fff;padding:8px; }
+
+  /* Footer */
+  .op-footer {
+    background:var(--ink);padding:12px 36px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .op-footer-text { font-family:'DM Mono',monospace;font-size:9px;color:#555;letter-spacing:1px; }
+
+  .op-loading {
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:400px;gap:16px;
+  }
+  .op-loading-spin { font-size:36px;animation:spin .8s linear infinite; }
+  .op-loading-text { font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:1px; }
+
+  @media print {
+    .op-close, .op-print { display:none; }
+    .onepager-overlay { position:static;padding:0;background:white; }
+    .onepager-page { box-shadow:none;width:100%; }
+  }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -832,6 +998,20 @@
   </div>
 </div>
 
+
+<!-- ONEPAGER MODAL -->
+<div class="onepager-overlay" id="onepager-overlay">
+  <button class="op-close" onclick="fecharOnepager()">✕</button>
+  <button class="op-print" onclick="window.print()">⬇ Imprimir</button>
+  <div class="onepager-page" id="onepager-page">
+    <div class="op-loading" id="op-loading">
+      <div class="op-loading-spin">⟳</div>
+      <div class="op-loading-text">Gerando infográfico...</div>
+    </div>
+    <div id="op-content" style="display:none;"></div>
+  </div>
+</div>
+
 <!-- CONTROLS -->
 <div class="controls">
   <span class="controls-label">Setor:</span>
@@ -860,6 +1040,7 @@
   </button>
   <button class="btn-pdf" onclick="printReport()">⬇ Salvar / Imprimir</button>
   <button class="btn-email-signup" onclick="abrirCadastro()">✉ Receber por Email</button>
+  <button class="btn-email-signup" id="btn-onepager" onclick="abrirOnepager()" style="background:var(--gold);color:var(--ink);">⬡ One-Pager</button>
   <div class="usage-pill" id="usage-pill">
     <div class="usage-bar"><div class="usage-bar-fill" id="usage-bar-fill"></div></div>
     <span class="usage-label" id="usage-label"></span>
@@ -1268,6 +1449,146 @@
       if (!chartInstances[sectionId]) chartInstances[sectionId] = [];
       chartInstances[sectionId].push(chart);
     });
+  }
+
+
+  // ── Onepager ──
+  let opCharts = [];
+
+  function fecharOnepager() {
+    document.getElementById('onepager-overlay').classList.remove('active');
+    opCharts.forEach(c => c.destroy());
+    opCharts = [];
+  }
+
+  async function abrirOnepager() {
+    const nichoSel = document.getElementById('nicho-select');
+    const nicho = nichoSel.value;
+    const dateStr = now.toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'});
+
+    document.getElementById('onepager-overlay').classList.add('active');
+    document.getElementById('op-loading').style.display = 'flex';
+    document.getElementById('op-content').style.display = 'none';
+    opCharts.forEach(c => c.destroy());
+    opCharts = [];
+
+    try {
+      const resp = await fetch('/api/onepager', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nicho, dateStr })
+      });
+      const result = await resp.json();
+      if (!result.success) throw new Error(result.error);
+
+      renderOnepager(result.data, nicho, dateStr);
+    } catch(e) {
+      document.getElementById('op-loading').innerHTML = '<p style="color:red;padding:40px">Erro: ' + e.message + '</p>';
+    }
+  }
+
+  function renderOnepager(d, nicho, dateStr) {
+    const impactoCor = { alto: '#b5341a', medio: '#c9a84c', baixo: '#1a7a4a' };
+
+    const html = `
+    <div class="op-header">
+      <div class="op-label">● Radar de Mercado · One-Pager Executivo</div>
+      <div class="op-title">${d.titulo || nicho}</div>
+      <div class="op-subtitle">${d.subtitulo || ''}</div>
+      <div class="op-meta">${dateStr} · Gerado por IA com dados de mercado</div>
+    </div>
+    <div class="op-body">
+
+      <div class="op-resumo">${d.resumo || ''}</div>
+
+      <div class="op-kpis">
+        ${(d.kpis || []).map(k => `
+          <div class="op-kpi">
+            <div class="op-kpi-unidade">${k.unidade || ''}</div>
+            <div class="op-kpi-valor">${k.valor || ''}</div>
+            <div class="op-kpi-label">${k.label || ''}</div>
+            <div class="op-kpi-var ${k.positivo ? 'up' : 'down'}">${k.variacao || ''}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="op-grid-2">
+        <div>
+          <div class="op-sec-title"><span>01</span> Novidades & Movimentos</div>
+          ${(d.novidades || []).map(n => `
+            <div class="op-novidade ${n.impacto || 'medio'}">
+              <span class="op-nov-tag ${n.impacto || 'medio'}">${(n.impacto||'').toUpperCase()}</span>
+              <div class="op-nov-titulo">${n.titulo || ''}</div>
+              <div class="op-nov-desc">${n.descricao || ''}</div>
+            </div>`).join('')}
+        </div>
+        <div>
+          <div class="op-sec-title"><span>02</span> Mercado</div>
+          <div class="op-chart-wrap"><canvas id="op-chart-mercado"></canvas></div>
+          <div style="margin-top:10px">
+          <div class="op-sec-title"><span>03</span> Players</div>
+          <div class="op-chart-wrap"><canvas id="op-chart-players"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="op-sec-title"><span>04</span> Tendências</div>
+      <div class="op-grid-2" style="margin-bottom:16px">
+        ${(d.tendencias || []).map(t => `
+          <div class="op-tend">
+            <div class="op-tend-icone">${t.icone || '●'}</div>
+            <div>
+              <div class="op-tend-ano">${t.horizonte || ''}</div>
+              <div class="op-tend-titulo">${t.titulo || ''}</div>
+              <div class="op-tend-desc">${t.descricao || ''}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+
+      <div class="op-oport">
+        <div class="op-oport-label">💡 Maior Oportunidade</div>
+        <div class="op-oport-text">${d.oportunidade_destaque || ''}</div>
+      </div>
+      <div class="op-alerta">
+        <div class="op-alerta-label">⚠ Ponto de Atenção</div>
+        <div class="op-alerta-text">${d.alerta || ''}</div>
+      </div>
+
+    </div>
+    <div class="op-footer">
+      <div class="op-footer-text">RADAR DE MERCADO · ${nicho.toUpperCase()} · ${dateStr}</div>
+      <div class="op-footer-text">GERADO POR IA · USO INTERNO</div>
+    </div>`;
+
+    document.getElementById('op-content').innerHTML = html;
+    document.getElementById('op-loading').style.display = 'none';
+    document.getElementById('op-content').style.display = 'block';
+
+    // Render charts
+    setTimeout(() => {
+      if (d.mercado_chart) {
+        const ctx = document.getElementById('op-chart-mercado');
+        if (ctx) opCharts.push(new Chart(ctx, {
+          type: d.mercado_chart.tipo || 'line',
+          data: {
+            labels: d.mercado_chart.labels,
+            datasets: [{ data: d.mercado_chart.dados, borderColor: '#c9a84c', backgroundColor: 'rgba(201,168,76,0.1)', fill: true, tension: 0.4, borderWidth: 2, pointRadius: 3 }]
+          },
+          options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{font:{size:9},color:'#999'}},y:{ticks:{font:{size:9},color:'#999'}}} }
+        }));
+      }
+      if (d.players_chart) {
+        const ctx2 = document.getElementById('op-chart-players');
+        const cores = ['#0d1117','#1a5f7a','#c9a84c','#b5341a','#6b6357'];
+        if (ctx2) opCharts.push(new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: d.players_chart.labels,
+            datasets: [{ data: d.players_chart.dados, backgroundColor: cores, borderWidth: 0 }]
+          },
+          options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right',labels:{font:{size:9},color:'#555',padding:4}}} }
+        }));
+      }
+    }, 150);
   }
 
   function printReport() { window.print(); }
