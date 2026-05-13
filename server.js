@@ -61,8 +61,8 @@ function agendarEnvioSemanal() {
 function callAnthropic(prompt) {
   return new Promise((resolve, reject) => {
     const payload = JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 4000,
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1500,
       tools: [{ type: 'web_search_20250305', name: 'web_search' }],
       messages: [{ role: 'user', content: prompt }]
     });
@@ -97,89 +97,18 @@ function callAnthropic(prompt) {
 // ── Gera cada seção ──
 async function gerarSecao(nicho, dateStr, tipo) {
   const prompts = {
-    novidades: `Você é analista sênior de mercado. Data: ${dateStr}. Analise o mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
-{
-  "html": "<p>Resumo breve das principais novidades em 2-3 parágrafos curtos.</p><ul><li>Novidade 1</li><li>Novidade 2</li><li>Novidade 3</li></ul><div class='highlight'>Dado de impacto aqui</div><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
-  "graficos": [
-    {
-      "titulo": "Título do gráfico 1 (ex: Crescimento do Mercado %)",
-      "tipo": "bar",
-      "labels": ["Label1","Label2","Label3","Label4","Label5"],
-      "dados": [10,25,40,30,55],
-      "cor": "#1a5f7a"
-    },
-    {
-      "titulo": "Título do gráfico 2 (ex: Evolução de Prêmios R$ bi)",
-      "tipo": "line",
-      "labels": ["2020","2021","2022","2023","2024"],
-      "dados": [120,145,167,198,234],
-      "cor": "#c9a84c"
-    }
-  ]
-}
-Use dados reais e específicos do setor "${nicho}" para os gráficos. Tipos válidos: bar, line, doughnut.`,
-    concorrencia: `Você é analista sênior de mercado. Data: ${dateStr}. Analise a concorrência no mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
-{
-  "html": "<p>Análise dos movimentos dos principais players.</p><ul><li><strong>Empresa A</strong>: ação tomada</li><li><strong>Empresa B</strong>: ação tomada</li></ul><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
-  "graficos": [
-    {
-      "titulo": "Market Share dos Principais Players (%)",
-      "tipo": "doughnut",
-      "labels": ["Empresa1","Empresa2","Empresa3","Empresa4","Outros"],
-      "dados": [28,22,18,12,20],
-      "cor": "#0d1117"
-    },
-    {
-      "titulo": "Título do gráfico 2 (ex: NPS ou crescimento por player)",
-      "tipo": "bar",
-      "labels": ["Empresa1","Empresa2","Empresa3","Empresa4"],
-      "dados": [45,38,29,52],
-      "cor": "#b5341a"
-    }
-  ]
-}
-Use dados reais de empresas do setor "${nicho}". Tipos válidos: bar, line, doughnut.`,
-    oportunidades: `Você é consultor estratégico. Data: ${dateStr}. Analise as oportunidades no mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
-{
-  "html": "<p>Principais oportunidades identificadas.</p><ul><li>Oportunidade 1</li><li>Oportunidade 2</li><li>Oportunidade 3</li></ul><div class='highlight'>Maior oportunidade em destaque</div><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
-  "graficos": [
-    {
-      "titulo": "Potencial de Mercado por Segmento (R$ bi)",
-      "tipo": "bar",
-      "labels": ["Segmento1","Segmento2","Segmento3","Segmento4"],
-      "dados": [15,28,42,19],
-      "cor": "#1a7a4a"
-    },
-    {
-      "titulo": "Título do gráfico 2 (ex: Taxa de penetração por região %)",
-      "tipo": "doughnut",
-      "labels": ["Região1","Região2","Região3","Região4"],
-      "dados": [35,28,22,15],
-      "cor": "#c9a84c"
-    }
-  ]
-}
-Use dados reais e específicos do setor "${nicho}". Tipos válidos: bar, line, doughnut.`,
-    tendencias: `Você é especialista em tendências. Data: ${dateStr}. Analise as tendências 2025-2030 do mercado de "${nicho}" e retorne APENAS um JSON válido sem markdown com esta estrutura exata:
-{
-  "html": "<p>Principais tendências para os próximos anos.</p><ul><li>Tendência 1</li><li>Tendência 2</li><li>Tendência 3</li></ul><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL'>Nome da fonte</a></li></ul></div>",
-  "graficos": [
-    {
-      "titulo": "Projeção de Crescimento do Mercado 2025-2030",
-      "tipo": "line",
-      "labels": ["2025","2026","2027","2028","2029","2030"],
-      "dados": [100,118,139,164,193,228],
-      "cor": "#1a5f7a"
-    },
-    {
-      "titulo": "Título do gráfico 2 (ex: adoção de tecnologia % por ano)",
-      "tipo": "bar",
-      "labels": ["2025","2026","2027","2028","2029","2030"],
-      "dados": [22,31,43,57,68,79],
-      "cor": "#c9a84c"
-    }
-  ]
-}`
+    novidades: `Analista de mercado. Data: ${dateStr}. Mercado: "${nicho}". Retorne JSON sem markdown:
+{"html":"<p>3 novidades recentes.</p><ul><li>item</li><li>item</li><li>item</li></ul><div class='highlight'>1 dado impacto</div><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL_REAL'>Fonte</a></li></ul></div>","graficos":[{"titulo":"Crescimento do Mercado","tipo":"bar","labels":["2021","2022","2023","2024","2025"],"dados":[0,0,0,0,0],"cor":"#1a5f7a"},{"titulo":"Evolução de Receita (R$ bi)","tipo":"line","labels":["2021","2022","2023","2024","2025"],"dados":[0,0,0,0,0],"cor":"#c9a84c"}]}
+Substitua os zeros por dados reais do setor.`,
+    concorrencia: `Analista de mercado. Data: ${dateStr}. Mercado: "${nicho}". Retorne JSON sem markdown:
+{"html":"<p>Movimentos dos principais players.</p><ul><li><strong>Empresa</strong>: ação</li><li><strong>Empresa</strong>: ação</li><li><strong>Empresa</strong>: ação</li></ul><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL_REAL'>Fonte</a></li></ul></div>","graficos":[{"titulo":"Market Share (%)","tipo":"doughnut","labels":["P1","P2","P3","P4","Outros"],"dados":[0,0,0,0,0],"cor":"#0d1117"},{"titulo":"Crescimento por Player (%)","tipo":"bar","labels":["P1","P2","P3","P4"],"dados":[0,0,0,0],"cor":"#b5341a"}]}
+Substitua os zeros e nomes por dados reais do setor.`,
+    oportunidades: `Consultor estratégico. Data: ${dateStr}. Mercado: "${nicho}". Retorne JSON sem markdown:
+{"html":"<p>3 oportunidades principais.</p><ul><li>Oportunidade 1</li><li>Oportunidade 2</li><li>Oportunidade 3</li></ul><div class='highlight'>Maior oportunidade</div><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL_REAL'>Fonte</a></li></ul></div>","graficos":[{"titulo":"Potencial por Segmento (R$ bi)","tipo":"bar","labels":["S1","S2","S3","S4"],"dados":[0,0,0,0],"cor":"#1a7a4a"},{"titulo":"Penetração por Região (%)","tipo":"doughnut","labels":["Sul","Sudeste","Centro-Oeste","Norte","Nordeste"],"dados":[0,0,0,0,0],"cor":"#c9a84c"}]}
+Substitua os zeros e labels por dados reais do setor.`,
+    tendencias: `Especialista em tendências. Data: ${dateStr}. Mercado: "${nicho}". Retorne JSON sem markdown:
+{"html":"<p>3 tendências 2025-2030.</p><ul><li>Tendência 1</li><li>Tendência 2</li><li>Tendência 3</li></ul><div class='fontes'><strong>Fontes:</strong><ul><li><a href='URL_REAL'>Fonte</a></li></ul></div>","graficos":[{"titulo":"Projeção de Crescimento 2025-2030","tipo":"line","labels":["2025","2026","2027","2028","2029","2030"],"dados":[0,0,0,0,0,0],"cor":"#1a5f7a"},{"titulo":"Adoção de Tecnologia (%)","tipo":"bar","labels":["2025","2026","2027","2028","2029","2030"],"dados":[0,0,0,0,0,0],"cor":"#c9a84c"}]}
+Substitua os zeros por dados reais do setor.`
   };
   const raw = await callAnthropic(prompts[tipo]);
   try {
@@ -422,6 +351,69 @@ const server = http.createServer(async (req, res) => {
           fontes: fontesHTML
         } }));
       } catch(e) {
+        res.end(JSON.stringify({ success: false, error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // Gerar onepager
+  if (req.method === 'POST' && req.url === '/api/onepager') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      try {
+        const { nicho, dateStr } = JSON.parse(body);
+        console.log('Gerando onepager:', nicho);
+
+        const prompt = `Você é analista sênior de mercado. Data: ${dateStr}. Gere um resumo executivo VISUAL do mercado de "${nicho}" para um infográfico one-pager. Retorne APENAS JSON válido sem markdown:
+{
+  "titulo": "Título chamativo do one-pager",
+  "subtitulo": "Subtítulo com contexto",
+  "resumo": "2 frases resumindo o momento do mercado",
+  "kpis": [
+    {"label": "Nome do KPI", "valor": "Valor", "unidade": "unidade", "variacao": "+12%", "positivo": true},
+    {"label": "Nome do KPI", "valor": "Valor", "unidade": "unidade", "variacao": "-3%", "positivo": false},
+    {"label": "Nome do KPI", "valor": "Valor", "unidade": "unidade", "variacao": "+8%", "positivo": true},
+    {"label": "Nome do KPI", "valor": "Valor", "unidade": "unidade", "variacao": "+25%", "positivo": true}
+  ],
+  "novidades": [
+    {"titulo": "Título curto", "descricao": "1 frase descrevendo a novidade", "impacto": "alto"},
+    {"titulo": "Título curto", "descricao": "1 frase descrevendo a novidade", "impacto": "medio"},
+    {"titulo": "Título curto", "descricao": "1 frase descrevendo a novidade", "impacto": "baixo"}
+  ],
+  "mercado_chart": {
+    "titulo": "Evolução do Mercado",
+    "tipo": "line",
+    "labels": ["2020","2021","2022","2023","2024","2025"],
+    "dados": [100,115,132,148,167,189]
+  },
+  "players_chart": {
+    "titulo": "Market Share (%)",
+    "tipo": "doughnut",
+    "labels": ["Player1","Player2","Player3","Player4","Outros"],
+    "dados": [28,22,18,14,18]
+  },
+  "tendencias": [
+    {"titulo": "Tendência 1", "descricao": "1 frase", "horizonte": "2025", "icone": "🤖"},
+    {"titulo": "Tendência 2", "descricao": "1 frase", "horizonte": "2026", "icone": "📱"},
+    {"titulo": "Tendência 3", "descricao": "1 frase", "horizonte": "2027", "icone": "🌱"},
+    {"titulo": "Tendência 4", "descricao": "1 frase", "horizonte": "2028", "icone": "💡"}
+  ],
+  "oportunidade_destaque": "Descrição em 1-2 frases da maior oportunidade do momento",
+  "alerta": "1 frase sobre principal risco ou ponto de atenção"
+}
+Use dados reais e específicos do setor "${nicho}".`;
+
+        const raw = await callAnthropic(prompt);
+        const start = raw.indexOf('{');
+        const end = raw.lastIndexOf('}');
+        if (start === -1) throw new Error('JSON inválido');
+        const data = JSON.parse(raw.substring(start, end + 1));
+        res.end(JSON.stringify({ success: true, data }));
+      } catch(e) {
+        console.error('Erro onepager:', e.message);
         res.end(JSON.stringify({ success: false, error: e.message }));
       }
     });
