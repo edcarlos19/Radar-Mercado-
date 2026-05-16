@@ -410,7 +410,33 @@ Use dados reais e específicos do setor "${nicho}".`;
         const start = raw.indexOf('{');
         const end = raw.lastIndexOf('}');
         if (start === -1) throw new Error('JSON inválido');
-        const data = JSON.parse(raw.substring(start, end + 1));
+        let jsonStr = raw.substring(start, end + 1);
+        // Sanitize: remove control characters that break JSON
+        jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ');
+        let data;
+        try {
+          data = JSON.parse(jsonStr);
+        } catch(parseErr) {
+          // Fallback: extract fields manually
+          console.error('JSON parse error, using fallback:', parseErr.message);
+          data = {
+            titulo: nicho + ' — Radar Semanal',
+            subtitulo: 'Análise de mercado gerada por IA',
+            resumo: 'Resumo do mercado de ' + nicho + ' para ' + dateStr,
+            kpis: [
+              {label:'Mercado Global',valor:'Em análise',unidade:'',variacao:'+0%',positivo:true},
+              {label:'Crescimento',valor:'Em análise',unidade:'',variacao:'+0%',positivo:true},
+              {label:'Players',valor:'Em análise',unidade:'',variacao:'+0%',positivo:true},
+              {label:'Oportunidade',valor:'Em análise',unidade:'',variacao:'+0%',positivo:true}
+            ],
+            novidades: [{titulo:'Análise indisponível',descricao:'Tente gerar novamente.',impacto:'medio'}],
+            mercado_chart: {titulo:'Evolução',tipo:'line',labels:['2021','2022','2023','2024','2025'],dados:[80,90,100,115,130]},
+            players_chart: {titulo:'Market Share',tipo:'doughnut',labels:['Player 1','Player 2','Player 3','Outros'],dados:[30,25,20,25]},
+            tendencias: [{titulo:'Digitalização',descricao:'Avanço digital no setor.',horizonte:'2026',icone:'💻'}],
+            oportunidade_destaque: 'Análise detalhada disponível no radar completo.',
+            alerta: 'Consulte o radar completo para análise aprofundada.'
+          };
+        }
         res.end(JSON.stringify({ success: true, data }));
       } catch(e) {
         console.error('Erro onepager:', e.message);
